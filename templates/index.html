@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Billing System</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, select { padding: 8px; width: 100%; max-width: 300px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px 0; }
+        button:hover { background: #0056b3; }
+        .products-section { border: 1px solid #ddd; padding: 15px; margin: 15px 0; }
+        .product-item { background: #f9f9f9; padding: 10px; margin: 10px 0; border: 1px solid #eee; }
+        .denominations { border-left: 3px solid #007bff; padding-left: 15px; margin: 20px 0; }
+        .error { color: red; font-weight: bold; }
+        .remove-btn { background: #dc3545; padding: 5px 10px; width: auto; margin-top: 5px; }
+        .remove-btn:hover { background: #c82333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>Billing System</h1>
+    
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+    
+    <form method="post" action="/purchase">
+        <div class="form-group">
+            <label>Customer Email:</label>
+            <input type="email" name="email" required>
+        </div>
+
+        <div class="products-section">
+            <h2>Products</h2>
+            <div id="products-container"></div>
+            <button type="button" onclick="addProduct()">+ Add New Product</button>
+        </div>
+
+        <div class="denominations">
+            <h2>Denominations Available</h2>
+            <table>
+                <tr>
+                    <th>Value</th>
+                    <th>Available Count</th>
+                </tr>
+                {% for denom in denominations %}
+                <tr>
+                    <td>₹{{ denom.value }}</td>
+                    <td>{{ denom.available_count }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="form-group">
+            <label>Paid Amount:</label>
+            <input type="number" name="paid_amount" step="0.01" required>
+        </div>
+
+        <button type="submit">Generate Bill</button>
+        <a href="/purchases"><button type="button">View Previous Purchases</button></a>
+    </form>
+
+    <script>
+        let productCount = 0;
+        const products = [
+            {% for p in products %}
+            { product_id: "{{ p.product_id }}", name: "{{ p.name }}", price: {{ p.price }}, stock: {{ p.stock }} }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        function addProduct() {
+            productCount++;
+            const container = document.getElementById('products-container');
+            const div = document.createElement('div');
+            div.className = 'product-item';
+            div.id = 'product-' + productCount;
+            
+            let options = '<option value="">Select Product</option>';
+            products.forEach(p => {
+                options += `<option value="${p.product_id}">${p.name} (₹${p.price}, Stock: ${p.stock})</option>`;
+            });
+            
+            div.innerHTML = `
+                <label>Product:</label>
+                <select name="product_id" required>
+                    ${options}
+                </select>
+                <label>Quantity:</label>
+                <input type="number" name="quantity" min="1" required>
+                <button type="button" class="remove-btn" onclick="removeProduct('product-${productCount}')">Remove</button>
+            `;
+            
+            container.appendChild(div);
+        }
+
+        function removeProduct(id) {
+            document.getElementById(id).remove();
+        }
+    </script>
+</body>
+</html>

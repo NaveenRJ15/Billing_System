@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .invoice { border: 1px solid #ddd; padding: 20px; max-width: 600px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f9f9f9; }
+        .total-row { font-weight: bold; background: #f0f0f0; }
+        .balance-section { border-left: 3px solid #28a745; padding-left: 15px; margin: 15px 0; }
+        .denominations-table { margin: 10px 0; }
+        a { margin: 10px 5px 0 0; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="invoice">
+        <h1>Invoice #{{ invoice.id }}</h1>
+        <p><strong>Email:</strong> {{ invoice.email }}</p>
+        <p><strong>Date:</strong> {{ invoice.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+        <h2>Purchased Items</h2>
+        <table>
+            <tr>
+                <th>Product ID</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Amount</th>
+                <th>Tax</th>
+            </tr>
+            {% for item in invoice.items %}
+            <tr>
+                <td>{{ item.product_id }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>₹{{ "%.2f"|format(item.price / item.quantity) }}</td>
+                <td>₹{{ "%.2f"|format(item.price) }}</td>
+                <td>₹{{ "%.2f"|format(item.tax) }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="4">Total Amount</td>
+                <td>₹{{ "%.2f"|format(invoice.total_amount) }}</td>
+            </tr>
+        </table>
+
+        <h2>Payment</h2>
+        <p><strong>Paid Amount:</strong> ₹{{ "%.2f"|format(invoice.paid_amount) }}</p>
+        <p><strong>Balance:</strong> ₹{{ "%.2f"|format(invoice.balance) }}</p>
+
+        {% if invoice.balance_denoms %}
+        <div class="balance-section">
+            <h2>Balance Denominations</h2>
+            <table class="denominations-table">
+                <tr>
+                    <th>Denomination</th>
+                    <th>Count</th>
+                </tr>
+                {% for bd in invoice.balance_denoms %}
+                <tr>
+                    <td>₹{{ bd.denomination_value }}</td>
+                    <td>{{ bd.count }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+
+        <div>
+            <a href="/"><button type="button">New Purchase</button></a>
+            <a href="/purchases"><button type="button">View All Purchases</button></a>
+        </div>
+    </div>
+</body>
+</html>

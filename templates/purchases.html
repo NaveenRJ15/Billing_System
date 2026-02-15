@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Purchase History</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f9f9f9; }
+        a { color: #007bff; text-decoration: none; cursor: pointer; }
+        a:hover { text-decoration: underline; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Purchase History</h1>
+    
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if invoices %}
+    <table>
+        <tr>
+            <th>Invoice ID</th>
+            <th>Email</th>
+            <th>Total Amount</th>
+            <th>Paid Amount</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+        {% for invoice in invoices %}
+        <tr>
+            <td>#{{ invoice.id }}</td>
+            <td>{{ invoice.email }}</td>
+            <td>₹{{ "%.2f"|format(invoice.total_amount) }}</td>
+            <td>₹{{ "%.2f"|format(invoice.paid_amount) }}</td>
+            <td>{{ invoice.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td><a href="/purchase/{{ invoice.id }}">View Details</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No purchases found.</p>
+    {% endif %}
+
+    <a href="/"><button type="button">New Purchase</button></a>
+</body>
+</html>
